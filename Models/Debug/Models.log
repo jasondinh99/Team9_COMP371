@@ -1,8 +1,0 @@
-﻿  main.cpp
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(215,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(233,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(304,34): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(305,34): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(326,58): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Models\main.cpp(327,56): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-  Models.vcxproj -> C:\Users\Piyush\Documents\Concordia\Summer 2022\COMP 371\Models\Debug\Models.exe
