@@ -16,7 +16,7 @@
 #include "Shader.h"
 #include "VAO.h"
 #include "Model.h"
-
+#include "Camera.h"
 
 using namespace glm;
 using namespace std;
@@ -24,7 +24,7 @@ using namespace std;
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-
+void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float dy);
 
 vec3 color = vec3(1.0f, 1.0f, 1.0f);
 
@@ -165,13 +165,14 @@ int main(int argc, char* argv[])
 
     // Camera parameters for view transform
     vec3 cameraPosition(5.0f, 1.0f, 20.0f);
-    vec3 cameraLookAt(0.0f, 0.0f, 0.0f);
+    vec3 cameraLookAt(0.0f, 0.0f, -1.0f);
     vec3 cameraUp(0.0f, 1.0f, 0.0f);
 
-    float cameraSpeed = 5.0f;
-    float cameraHorizontalAngle = 90.0f;
-    float cameraVerticalAngle = 0.0f;
+    //float cameraSpeed = 5.0f;
+    //float cameraHorizontalAngle = 90.0f;
+    //float cameraVerticalAngle = 0.0f;
 
+    Camera* camera = new Camera(cameraPosition, cameraLookAt, cameraUp);
 
     // Olaf parameters
     float posX = 0.0f;
@@ -196,11 +197,11 @@ int main(int argc, char* argv[])
 
 
     // Set View and Projection matrices on both shaders
-    setViewMatrix(colorShaderProgram.ID, viewMatrix);
-    setViewMatrix(texturedShaderProgram.ID, viewMatrix);
+    setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
+    setViewMatrix(texturedShaderProgram.ID, camera->GetViewMatrix());
 
-    setProjectionMatrix(colorShaderProgram.ID, projectionMatrix);
-    setProjectionMatrix(texturedShaderProgram.ID, projectionMatrix);
+    setProjectionMatrix(colorShaderProgram.ID, camera->GetProjectionMatrix());
+    setProjectionMatrix(texturedShaderProgram.ID, camera->GetProjectionMatrix());
 
 
 
@@ -318,84 +319,48 @@ int main(int argc, char* argv[])
         lastMousePosX = mousePosX;
         lastMousePosY = mousePosY;
 
+        camera->Update(dt);
 
-        // Convert to spherical coordinates
-        const float cameraAngularSpeed = 1.0f;
-        
-        cameraHorizontalAngle -= dx * cameraAngularSpeed * dt;
-        cameraVerticalAngle -= dy * cameraAngularSpeed * dt;
+        handleInput(window, camera, dt, dx, dy);
 
 
+        //// Convert to spherical coordinates
+        //const float cameraAngularSpeed = 1.0f;
+        //
+        //cameraHorizontalAngle -= dx * cameraAngularSpeed * dt;
+        //cameraVerticalAngle -= dy * cameraAngularSpeed * dt;
 
-        // World Orientation
-         // Clamp vertical angle to [-85, 85] degrees
-        cameraVerticalAngle = std::max(-85.0f, std::min(85.0f, cameraVerticalAngle));
-        if (cameraHorizontalAngle > 360)
-        {
-            cameraHorizontalAngle -= 360;
-        }
-        else if (cameraHorizontalAngle < -360)
-        {
-            cameraHorizontalAngle += 360;
-        }
 
-        float theta = radians(cameraHorizontalAngle);
-        float phi = radians(cameraVerticalAngle);
 
-        cameraLookAt = vec3(cosf(phi) * cosf(theta), sinf(phi), -cosf(phi) * sinf(theta));
-        vec3 cameraSideVector = glm::cross(cameraLookAt, vec3(0.0f, 1.0f, 0.0f));
+        //// World Orientation
+        // // Clamp vertical angle to [-85, 85] degrees
+        //cameraVerticalAngle = std::max(-85.0f, std::min(85.0f, cameraVerticalAngle));
+        //if (cameraHorizontalAngle > 360)
+        //{
+        //    cameraHorizontalAngle -= 360;
+        //}
+        //else if (cameraHorizontalAngle < -360)
+        //{
+        //    cameraHorizontalAngle += 360;
+        //}
 
-        glm::normalize(cameraSideVector);
+        //float theta = radians(cameraHorizontalAngle);
+        //float phi = radians(cameraVerticalAngle);
+        //
+        //cameraLookAt = vec3(cosf(phi) * cosf(theta), sinf(phi), -cosf(phi) * sinf(theta));
+        //vec3 cameraSideVector = glm::cross(cameraLookAt, vec3(0.0f, 1.0f, 0.0f));
+        //
+        //glm::normalize(cameraSideVector);
 
-        // @TODO 5 = use camera lookat and side vectors to update positions with ASDW
-        // adjust code below
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move camera to the left
-        {
-            cameraPosition -= cameraSideVector * cameraSpeed * dt;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move camera to the right
-        {
-            cameraPosition += cameraSideVector * cameraSpeed * dt;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // move camera down
-        {
-            cameraPosition -= cameraLookAt * cameraSpeed * dt;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // move camera up
-        {
-            cameraPosition += cameraLookAt * cameraSpeed * dt;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // zoom out
-        {
-            cameraPosition -= cameraLookAt * cameraSpeed * dt;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) //Zoom in
-        {
-            cameraPosition += cameraLookAt * cameraSpeed * dt;
-        }
-
-        viewMatrix = lookAt(cameraPosition,  // eye
-            cameraLookAt + cameraPosition,  // center
-            cameraUp); // up
-
-        setViewMatrix(colorShaderProgram.ID, viewMatrix);
-        setViewMatrix(texturedShaderProgram.ID, viewMatrix);
+        setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
+        setViewMatrix(texturedShaderProgram.ID, camera->GetViewMatrix());
 
         if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
         {
-            cameraPosition = vec3(5.0f, 1.0f, 50.0f);
+            camera->setPosition(vec3(5.0f, 1.0f, 50.0f));
 
-            viewMatrix = lookAt(cameraPosition,  // eye
-                cameraLookAt + cameraPosition,  // center
-                cameraUp); // up
-            setViewMatrix(colorShaderProgram.ID, viewMatrix);
-            setViewMatrix(texturedShaderProgram.ID, viewMatrix);
-            
+            setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
+            setViewMatrix(texturedShaderProgram.ID, camera->GetViewMatrix());
         }
 
     }
@@ -404,4 +369,34 @@ int main(int argc, char* argv[])
     glfwTerminate();
 
     return 0;
+}
+
+void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float dy)
+{
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)      // close screen
+        glfwSetWindowShouldClose(window, true);
+
+    // WASD
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // move camera forward
+        camera->Move(true, dt);
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // move camera backward
+        camera->Move(true, -dt);
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move camera to the left
+        camera->Move(false, -dt);
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move camera to the right
+        camera->Move(false, dt);
+
+    // zoom
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // zoom out
+        camera->Move(true, dt);
+
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) //Zoom in
+        camera->Move(true, -dt);
+
+    // Mouse buttons
+    camera->Turn(dx * -0.01, dy * -0.01);
 }
