@@ -26,6 +26,7 @@ using namespace std;
 
 void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float dy);
 
+int currentCamera = 1;
 vec3 color = vec3(1.0f, 1.0f, 1.0f);
 
 vec3 cubeArray[] = {  // position
@@ -163,16 +164,20 @@ int main(int argc, char* argv[])
     //glUseProgram(shaderProgram);
     colorShaderProgram.Activate();
 
-    // Camera parameters for view transform
-    vec3 cameraPosition(5.0f, 1.0f, 20.0f);
-    vec3 cameraLookAt(0.0f, 0.0f, -1.0f);
-    vec3 cameraUp(0.0f, 1.0f, 0.0f);
-
+    //// Camera parameters for view transform
+    //vec3 cameraPosition(5.0f, 1.0f, 20.0f);
+    //vec3 cameraLookAt(0.0f, 0.0f, -1.0f);
+    //vec3 cameraUp(0.0f, 1.0f, 0.0f);
+    //
     //float cameraSpeed = 5.0f;
     //float cameraHorizontalAngle = 90.0f;
     //float cameraVerticalAngle = 0.0f;
-
-    Camera* camera = new Camera(cameraPosition, cameraLookAt, cameraUp);
+    
+    Camera* camera = nullptr;
+    Camera* firstPersonCamera = new Camera(vec3(0.0f, 1.0f, 20.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
+    Camera* staticCamera1 = new Camera(vec3(50.0f, 30.0f, 50.0f), vec3(-5.0f, -1.0f, -5.0f), vec3(0.0f, 1.0f, 0.0f));
+    Camera* staticCamera2 = new Camera(vec3(-50.0f, 30.0f, -50.0f), vec3(5.0f, -1.0f, 5.0f), vec3(0.0f, 1.0f, 0.0f));
+    camera = firstPersonCamera;
 
     // Olaf parameters
     float posX = 0.0f;
@@ -185,15 +190,15 @@ int main(int argc, char* argv[])
     GLenum rendering = GL_TRIANGLES;
 
 
-    // Set projection matrix for shader, this won't change
-    mat4 projectionMatrix = glm::perspective(70.0f,            // field of view in degrees
-        1024.0f / 768.0f,  // aspect ratio
-        0.01f, 100.0f);   // near and far (near > 0)
-
-    // Set initial view matrix
-    mat4 viewMatrix = lookAt(cameraPosition,  // eye
-        cameraPosition + cameraLookAt,  // center
-        cameraUp); // up
+    //// Set projection matrix for shader, this won't change
+    //mat4 projectionMatrix = glm::perspective(70.0f,            // field of view in degrees
+    //    1024.0f / 768.0f,  // aspect ratio
+    //    0.01f, 100.0f);   // near and far (near > 0)
+    //
+    //// Set initial view matrix
+    //mat4 viewMatrix = lookAt(cameraPosition,  // eye
+    //    cameraPosition + cameraLookAt,  // center
+    //    cameraUp); // up
 
 
     // Set View and Projection matrices on both shaders
@@ -319,9 +324,16 @@ int main(int argc, char* argv[])
         lastMousePosX = mousePosX;
         lastMousePosY = mousePosY;
 
+        if (currentCamera == 1)
+            camera = firstPersonCamera;
+        else if (currentCamera == 2)
+            camera = staticCamera1;
+        else
+            camera = staticCamera2;
+
         camera->Update(dt);
 
-        handleInput(window, camera, dt, dx, dy);
+        handleInput(window, firstPersonCamera, dt, dx, dy);
 
 
         //// Convert to spherical coordinates
@@ -357,7 +369,7 @@ int main(int argc, char* argv[])
 
         if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
         {
-            camera->setPosition(vec3(5.0f, 1.0f, 50.0f));
+            camera->SetPosition(vec3(5.0f, 1.0f, 50.0f));
 
             setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
             setViewMatrix(texturedShaderProgram.ID, camera->GetViewMatrix());
@@ -376,6 +388,16 @@ void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float d
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)      // close screen
         glfwSetWindowShouldClose(window, true);
+
+    // Choose camera
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)      // close screen
+        currentCamera = 1;
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)      // close screen
+        currentCamera = 2;
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)      // close screen
+        currentCamera = 3;
 
     // WASD
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // move camera forward

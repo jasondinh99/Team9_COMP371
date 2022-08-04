@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera(vec3 position, vec3 lookAt, vec3 upVector)
-    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(2.0f), cameraNormalSpeed(2.0f), cameraFastSpeed(5.f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f), withGravity(true) {}
+    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(2.0f), cameraNormalSpeed(2.0f), cameraFastSpeed(5.f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f), withGravity(false) {}
 
 mat4 Camera::GetViewProjectionMatrix() const
 {
@@ -49,10 +49,12 @@ void Camera::setViewMatrix(int shaderProgram, mat4 viewMatrix)
 
 void Camera::Update(float dt)
 {
-    if (withGravity && cameraPosition.y > 0.0)
+    // Apply gravity
+    if (withGravity)
         cameraPosition += vec3(0.0f, -1.0f, 0.0f) * dt * gravity;
 
-    CheckCollision();
+    //CheckCollision();
+    CheckBoundary();
 
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &GetViewMatrix()[0][0]);
 }
@@ -85,15 +87,17 @@ void Camera::Turn(float dx, float dy)
 
 void Camera::Move(bool option, float dt)
 {
-    vec3 cameraSideVector = glm::cross(cameraLookAt, vec3(0.0f, 1.0f, 0.0f));
+    float normalizedSpeed = cameraSpeed * 10 * dt;
+
+    vec3 cameraSideVector = glm::cross(cameraLookAt, cameraUp);
     glm::normalize(cameraSideVector);
 
     if(option == true)
-        cameraPosition += cameraLookAt * dt * cameraSpeed;
+        cameraPosition += cameraLookAt * normalizedSpeed;
     else
-        cameraPosition += cameraSideVector * dt * cameraSpeed;
+        cameraPosition += cameraSideVector * normalizedSpeed;
 
-    CheckCollision();
+    CheckBoundary();
 }
 
 void Camera::Reset()
@@ -128,7 +132,12 @@ void Camera::NormalSpeed()
     cameraSpeed = cameraNormalSpeed;
 }
 
-bool Camera::CheckCollision()
+bool Camera::CheckCollision(vec3 planePoint, vec3 planeNormal, float distance)
+{
+    return glm::dot(planeNormal, GetPosition() - planePoint) < distance;
+}
+
+void Camera::CheckBoundary()
 {
     // To make sure that cameras do not go out of the field
     if (cameraPosition.x > 50)
@@ -145,6 +154,4 @@ bool Camera::CheckCollision()
         cameraPosition.z = -50;
     else if (cameraPosition.z < -50)
         cameraPosition.z = 50;
-    
-    return true;
 }

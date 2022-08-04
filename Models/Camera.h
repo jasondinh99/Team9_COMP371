@@ -23,33 +23,35 @@ public:
     void Turn(float, float);
     void Move(bool, float);
     void Reset();
-    mat4 GetViewProjectionMatrix() const;
-    mat4 GetProjectionMatrix() const;
-    mat4 GetViewMatrix() const;
-    inline void setPosition(vec3 position) { cameraPosition = position; }
-    void setViewMatrix(int, mat4);
-    void setProjectionMatrix(int, mat4);
-    void setShaderProgram(int);
     void EnableGravity();
     void DisableGravity();
     void Jump();
     void FastSpeed();
     void NormalSpeed();
-    bool CheckCollision();
-    float cameraSpeed;
+    bool CheckCollision(vec3, vec3, float);
+    void CheckBoundary();
+    inline void SetPosition(vec3 position) { cameraPosition = position; }
+    inline vec3 GetPosition() { return cameraPosition; }
+    mat4 GetViewProjectionMatrix() const;
+    mat4 GetProjectionMatrix() const;
+    mat4 GetViewMatrix() const;
+    void setViewMatrix(int, mat4);
+    void setProjectionMatrix(int, mat4);
 private:
     GLuint projectionMatrixLocation;
     GLuint viewMatrixLocation;
-
     vec3 cameraPosition;
     vec3 cameraLookAt;
     vec3 cameraUp;
+    
+    float cameraSpeed;
     float cameraNormalSpeed;
     float cameraFastSpeed;
+    
     float cameraHorizontalAngle;
     float cameraVerticalAngle;
     float cameraAngularSpeed;
-    int type;
+    
     bool withGravity;
     const float gravity = 9.807;
 };
