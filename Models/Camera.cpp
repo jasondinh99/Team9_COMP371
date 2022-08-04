@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera(vec3 position, vec3 lookAt, vec3 upVector)
-    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(5.0f), cameraFastSpeed(10.f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f) {}
+    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(2.0f), cameraNormalSpeed(2.0f), cameraFastSpeed(5.f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f), withGravity(true) {}
 
 mat4 Camera::GetViewProjectionMatrix() const
 {
@@ -49,21 +49,10 @@ void Camera::setViewMatrix(int shaderProgram, mat4 viewMatrix)
 
 void Camera::Update(float dt)
 {
-    // To make sure that cameras do not go out of the field
-    if (cameraPosition.x > 50)
-        cameraPosition.x = -50;
-    else if (cameraPosition.x < -50)
-        cameraPosition.x = 50;
+    if (withGravity && cameraPosition.y > 0.0)
+        cameraPosition += vec3(0.0f, -1.0f, 0.0f) * dt * gravity;
 
-    if (cameraPosition.y > 50)
-        cameraPosition.y = 50;
-    else if (cameraPosition.y < 0.1)
-        cameraPosition.y = 0.1;
-
-    if (cameraPosition.z > 50)
-        cameraPosition.z = -50;
-    else if (cameraPosition.z < -50)
-        cameraPosition.z = 50;
+    CheckCollision();
 
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &GetViewMatrix()[0][0]);
 }
@@ -103,6 +92,8 @@ void Camera::Move(bool option, float dt)
         cameraPosition += cameraLookAt * dt * cameraSpeed;
     else
         cameraPosition += cameraSideVector * dt * cameraSpeed;
+
+    CheckCollision();
 }
 
 void Camera::Reset()
@@ -110,4 +101,50 @@ void Camera::Reset()
     cameraPosition = vec3(0.0f, 4.0f, 30.0f);
     cameraLookAt = vec3(0.0f, 0.0f, -1.0f);
     cameraUp = vec3(0.0f, 1.0f, 0.0f);
+}
+
+void Camera::EnableGravity()
+{
+    withGravity = true;
+}
+
+void Camera::DisableGravity()
+{
+    withGravity = false;
+}
+
+void Camera::Jump()
+{
+    cameraPosition += vec3(0.0f, 2.0f, 0.0f);
+}
+
+void Camera::FastSpeed()
+{
+    cameraSpeed = cameraFastSpeed;
+}
+
+void Camera::NormalSpeed()
+{
+    cameraSpeed = cameraNormalSpeed;
+}
+
+bool Camera::CheckCollision()
+{
+    // To make sure that cameras do not go out of the field
+    if (cameraPosition.x > 50)
+        cameraPosition.x = -50;
+    else if (cameraPosition.x < -50)
+        cameraPosition.x = 50;
+
+    if (cameraPosition.y > 50)
+        cameraPosition.y = 50;
+    else if (cameraPosition.y < 0.1)
+        cameraPosition.y = 0.1;
+
+    if (cameraPosition.z > 50)
+        cameraPosition.z = -50;
+    else if (cameraPosition.z < -50)
+        cameraPosition.z = 50;
+    
+    return true;
 }

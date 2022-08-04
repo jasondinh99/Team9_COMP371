@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
             glfwSetWindowShouldClose(window, true);
 
         //  re-position the Olaf at a random location on the grid
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
         {
             posX = (rand() % 99) - 49;
             posZ = (rand() % 99) - 49;
@@ -396,6 +396,21 @@ void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float d
 
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) //Zoom in
         camera->Move(true, -dt);
+
+    if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) //Zoom in
+        camera->EnableGravity();
+
+    if (glfwGetKey(window, GLFW_KEY_END) == GLFW_PRESS) //Zoom in
+        camera->DisableGravity();
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) //Zoom in
+        camera->Jump();
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) //Zoom in
+        camera->FastSpeed();
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) //Zoom in
+        camera->NormalSpeed();
 
     // Mouse buttons
     camera->Turn(dx * -0.01, dy * -0.01);

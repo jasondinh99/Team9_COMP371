@@ -30,6 +30,12 @@ public:
     void setViewMatrix(int, mat4);
     void setProjectionMatrix(int, mat4);
     void setShaderProgram(int);
+    void EnableGravity();
+    void DisableGravity();
+    void Jump();
+    void FastSpeed();
+    void NormalSpeed();
+    bool CheckCollision();
     float cameraSpeed;
 private:
     GLuint projectionMatrixLocation;
@@ -38,9 +44,12 @@ private:
     vec3 cameraPosition;
     vec3 cameraLookAt;
     vec3 cameraUp;
+    float cameraNormalSpeed;
     float cameraFastSpeed;
     float cameraHorizontalAngle;
     float cameraVerticalAngle;
     float cameraAngularSpeed;
     int type;
+    bool withGravity;
+    const float gravity = 9.807;
 };

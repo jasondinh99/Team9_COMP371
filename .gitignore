@@ -1,6 +1,8 @@
 Bin/
 Build/
 ThirdParty/
-.vs/
+.vs/**
 **/Debug/
 **/Release/
+x64/
+x86/
