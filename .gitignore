@@ -1,0 +1,6 @@
+Bin/
+Build/
+ThirdParty/
+.vs/
+**/Debug/
+**/Release/
