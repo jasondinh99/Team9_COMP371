@@ -13,6 +13,9 @@
 #include <glm/common.hpp>
 #include <vector>
 
+# include "PerlinNoise.h"	// https://github.com/sol-prog/Perlin_Noise
+#include <time.h>
+
 #include "Shader.h"
 #include "VAO.h"
 #include "Model.h"
@@ -224,6 +227,7 @@ int main(int argc, char* argv[])
     double lastMousePosX, lastMousePosY;
     glfwGetCursorPos(window, &lastMousePosX, &lastMousePosY);
 
+
     // Enable Backface culling
     glEnable(GL_CULL_FACE);
 
@@ -232,6 +236,30 @@ int main(int argc, char* argv[])
 
     cout << glGetString(GL_VERSION);
 
+
+	// Perlin noise setup
+	srand(time(NULL));
+	unsigned int seed = time(NULL);
+	PerlinNoise pn(seed);
+	cout << " Seed: " << seed << endl;
+
+	// caculate height of each ground square
+	const unsigned int grid_depth = 100;
+	const unsigned int grid_width = 100;
+
+	unsigned int height_array[grid_width][grid_depth];
+
+	for (unsigned int i = 0; i < grid_depth; ++i) {     // z
+		for (unsigned int j = 0; j < grid_width; ++j) {  // x
+			double x = (double)j / ((double)grid_width);
+			double z = (double)i / ((double)grid_depth);
+
+			double terrain_height = floor(10 * pn.noise(x, z, 0.8)); // perlin noise to generate height between 0 and 9
+			double terrain_depth = i;
+			double terrain_width = j;
+			height_array[j][i] = terrain_height;
+		}
+	}
 
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
@@ -293,6 +321,16 @@ int main(int argc, char* argv[])
 
         }        
 
+		// Draw ground
+		for (int z_position = 0; z_position < grid_depth; z_position++) {     // z
+			for (int x_position = 0; x_position < grid_width; x_position++) {  // x
+				mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(x_position-50, height_array[z_position][x_position], z_position-50)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+				setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
+		}
+
+
 
         glBindVertexArray(0);
         // End Frame
@@ -314,7 +352,14 @@ int main(int argc, char* argv[])
         //Shift
         bool shiftPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
 
-        
+		// print heigth of terrain
+		if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+			for (int i = 0; i < grid_depth; i++) {
+				for (int j = 0; j < grid_width; j++) {
+					cout << "(" << j << ", " << i << ") = " << height_array[j][i] << endl;
+				}
+			}
+		}
 
         double mousePosX, mousePosY;
         glfwGetCursorPos(window, &mousePosX, &mousePosY);
@@ -410,8 +455,9 @@ void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float d
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move camera to the left
         camera->Move(false, -dt);
 
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move camera to the right
-        camera->Move(false, dt);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move camera to the right
+		camera->Move(false, dt);
+
 
     // zoom
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // zoom out
