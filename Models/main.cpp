@@ -178,6 +178,7 @@ int main(int argc, char* argv[])
     Camera* staticCamera1 = new Camera(vec3(50.0f, 30.0f, 50.0f), vec3(-5.0f, -1.0f, -5.0f), vec3(0.0f, 1.0f, 0.0f));
     Camera* staticCamera2 = new Camera(vec3(-50.0f, 30.0f, -50.0f), vec3(5.0f, -1.0f, 5.0f), vec3(0.0f, 1.0f, 0.0f));
     camera = firstPersonCamera;
+    firstPersonCamera->EnableGravity();
 
     // Olaf parameters
     float posX = 0.0f;

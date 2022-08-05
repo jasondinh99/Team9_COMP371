@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera(vec3 position, vec3 lookAt, vec3 upVector)
-    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(2.0f), cameraNormalSpeed(2.0f), cameraFastSpeed(5.f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f), withGravity(false) {}
+    : cameraPosition(position), cameraLookAt(lookAt), cameraUp(upVector), cameraSpeed(1.0f), cameraNormalSpeed(1.0f), cameraFastSpeed(2.0f), cameraAngularSpeed(60.0f), cameraHorizontalAngle(90.0f), cameraVerticalAngle(0.0f), withGravity(false) {}
 
 mat4 Camera::GetViewProjectionMatrix() const
 {
@@ -87,7 +87,7 @@ void Camera::Turn(float dx, float dy)
 
 void Camera::Move(bool option, float dt)
 {
-    float normalizedSpeed = cameraSpeed * 10 * dt;
+    float normalizedSpeed = cameraSpeed * 5 * dt;
 
     vec3 cameraSideVector = glm::cross(cameraLookAt, cameraUp);
     glm::normalize(cameraSideVector);
