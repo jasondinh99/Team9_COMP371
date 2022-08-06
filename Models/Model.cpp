@@ -205,7 +205,7 @@ int Model::createTerrainAO() {
     }
 
     ColoredVertex vertexArray[100*100];
-    int indices[99*99*6];
+    int indices[100*100*6];
     int width = 100;
     int height = 100;
     int m_sqrWidth = 1;
@@ -224,9 +224,9 @@ int Model::createTerrainAO() {
 
     //Calculating Indices
     int counter2 = 0;
-    for (int z = 0; z < height-1; z++)
+    for (int z = 0; z < height; z++)
     {
-        for (int x = 0; x < width-1; x++)
+        for (int x = 0; x < width; x++)
         {
             int base = x + (width*z);
             //TODO: if time, alternate triangles so it meshes better
