@@ -121,6 +121,17 @@ void setWorldMatrix(int shaderProgram, mat4 worldMatrix)
 
 Model model = Model();
 
+int random(int min, int max) //range : [min, max]
+{
+    static bool first = true;
+    if (first)
+    {
+        srand(time(NULL)); //seeding for the first time only!
+        first = false;
+    }
+    return min + rand() % ((max + 1) - min);
+}
+
 int main(int argc, char* argv[])
 {
     // Initialize GLFW and OpenGL version
@@ -265,12 +276,15 @@ int main(int argc, char* argv[])
 
         // Draw Textured geometry
         glUseProgram(texturedShaderProgram.ID);
+       
+
 
         for (int i = 0; i < 10; i += 2) {
+
             glActiveTexture(GL_TEXTURE0);
-            GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-            glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
-            glUniform1i(textureLocation, 0);
+        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+        glUniform1i(textureLocation, 0);
 
             float trunkX = 0.0f + randArray[i];
             float trunkY = 10.0f;
@@ -295,6 +309,59 @@ int main(int argc, char* argv[])
                 physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(3.0f, 1.0f, 15.0f - j));
             }
         }
+
+        /*Draw Apple Tree*/
+        glBindVertexArray(texturedCubeAO);
+
+        // Draw Textured geometry
+        glUseProgram(texturedShaderProgram.ID);
+
+        glActiveTexture(GL_TEXTURE0);
+        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+        glUniform1i(textureLocation, 0);
+
+        float trunkX = 0.0f;
+        float trunkY = 10.0f;
+        float trunkZ = 0.0f;
+
+        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw Branches Bottom
+        glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+       for (int y = 0; y < 5; y++)
+        {
+            for (int x = -1-y; x < 2+y; x++)
+            {
+                for (int z = -1-y; z < 2+y; z++)
+                {
+                    treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+                    setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+        }
+
+       // Draw Branches Top
+
+        for (int y = 0; y < 5; y++)
+        {
+            for (int x = -5 + y; x < 7 - y; x++)
+            {
+                for (int z = -5 + y; z < 7 - y; z++)
+                {
+                    treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + (y+5), trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+                    setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+        }
+       
+
+       
+
 
         glBindVertexArray(0);
         // End Frame

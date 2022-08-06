@@ -281,3 +281,119 @@ int Model::createTerrainAO() {
 
     return vertexArrayObject;
 }
+
+void Model::setWorldMatrix(int shaderProgram, mat4 worldMatrix)
+{
+    glUseProgram(shaderProgram);
+    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
+    glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &worldMatrix[0][0]);
+}
+
+void Model::drawChristmasTree(int texturedCubeAO, Shader texturedShaderProgram, vec3 location)
+{
+    GLuint tree_barkTextureID = loadTexture("assets/textures/tree-bark.jpg");
+    GLuint leavesTextureID = loadTexture("assets/textures/minecraft-leaves.png");
+
+    /*Draw Tree*/
+    glBindVertexArray(texturedCubeAO);
+
+    // Draw Textured geometry
+    glUseProgram(texturedShaderProgram.ID);
+
+    glActiveTexture(GL_TEXTURE0);
+    GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+    glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+    glUniform1i(textureLocation, 0);
+
+    float trunkX = 0.0f;
+    float trunkY = 10.0f;
+    float trunkZ = 0.0f;
+
+    mat4 position = translate(mat4(1.0f), location);
+
+    mat4 treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+    setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // Draw Branches
+    glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+    for (int i = 0; i < 12; i += 2)
+    {
+        treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    }
+
+}
+
+void Model::drawSpruceTree(int texturedCubeAO, Shader texturedShaderProgram, vec3 location)
+{
+    GLuint tree_barkTextureID = loadTexture("assets/textures/tree-bark.jpg");
+    GLuint leavesTextureID = loadTexture("assets/textures/minecraft-leaves.png");
+
+    /*Draw Tree*/
+    glBindVertexArray(texturedCubeAO);
+
+    // Draw Textured geometry
+    glUseProgram(texturedShaderProgram.ID);
+
+    glActiveTexture(GL_TEXTURE0);
+    GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+    glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+    glUniform1i(textureLocation, 0);
+
+    float trunkX = 0.0f;
+    float trunkY = 10.0f;
+    float trunkZ = 0.0f;
+
+    mat4 position = translate(mat4(1.0f), location);
+
+    mat4 treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+    setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // Draw Branches
+    glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+    for (int y = 0; y < 12; y++)
+    {
+        for (int x = -2; x < 3; x++)
+        {
+            for (int z = -2; z < 3; z++)
+            {
+                treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX + x, trunkY + y, trunkZ + z)) * scale(mat4(1.0f), vec3(random(1, 5), 1.0f, random(1, 5)));
+                setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+        }
+    }
+
+
+    /*for (int i = 0; i < 12; i += 2)
+    {
+        treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        treeWorldMatrix = position * translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }*/
+
+
+}
+
+int Model::random(int min, int max) //range : [min, max]
+{
+    static bool first = true;
+    if (first)
+    {
+        srand(time(NULL)); //seeding for the first time only!
+        first = false;
+    }
+    return min + rand() % ((max + 1) - min);
+}

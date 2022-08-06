@@ -19,6 +19,8 @@
 #include "VAO.h"
 #include "PerlinNoise.h"
 
+#include "Shader.h"
+
 
 using namespace glm;
 using namespace std;
@@ -40,6 +42,15 @@ public:
 	int createTerrainAO();
 	GLuint loadTexture(const char* filename);
 	inline float getTerrainHeightAt(int j, int i) { return terrainHeightArray[j][i]; }
+
+	void setWorldMatrix(int shaderProgram, mat4 worldMatrix);
+
+	void drawChristmasTree(int, Shader, vec3);
+	void drawSpruceTree(int, Shader, vec3);
+
+	int random(int, int);
+
+
 
 private:
 	float terrainHeightArray[100][100];
