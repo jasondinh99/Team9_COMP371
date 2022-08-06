@@ -39,9 +39,10 @@ public:
 	int createTexturedCubeAO();
 	int createTerrainAO();
 	GLuint loadTexture(const char* filename);
+	inline float getTerrainHeightAt(int j, int i) { return terrainHeightArray[j][i]; }
 
 private:
-	
+	float terrainHeightArray[100][100];
 };
 
 

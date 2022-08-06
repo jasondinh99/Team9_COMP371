@@ -20,6 +20,7 @@
 #include "VAO.h"
 #include "Model.h"
 #include "Camera.h"
+#include "Cube.h"
 
 using namespace glm;
 using namespace std;
@@ -28,8 +29,11 @@ using namespace std;
 #include <math.h>
 
 void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float dy);
+void terrainCollision(Camera* camera);
 
 int currentCamera = 1;
+Cube* physicalCubeArray[100];
+int cubeNum = 0;
 vec3 color = vec3(1.0f, 1.0f, 1.0f);
 
 vec3 cubeArray[] = {  // position
@@ -115,7 +119,7 @@ void setWorldMatrix(int shaderProgram, mat4 worldMatrix)
 }
 
 
-Model model;
+Model model = Model();
 
 int main(int argc, char* argv[])
 {
@@ -167,19 +171,10 @@ int main(int argc, char* argv[])
     //glUseProgram(shaderProgram);
     colorShaderProgram.Activate();
 
-    //// Camera parameters for view transform
-    //vec3 cameraPosition(5.0f, 1.0f, 20.0f);
-    //vec3 cameraLookAt(0.0f, 0.0f, -1.0f);
-    //vec3 cameraUp(0.0f, 1.0f, 0.0f);
-    //
-    //float cameraSpeed = 5.0f;
-    //float cameraHorizontalAngle = 90.0f;
-    //float cameraVerticalAngle = 0.0f;
-    
     Camera* camera = nullptr;
-    Camera* firstPersonCamera = new Camera(vec3(0.0f, 1.0f, 20.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
-    Camera* staticCamera1 = new Camera(vec3(50.0f, 30.0f, 50.0f), vec3(-5.0f, -1.0f, -5.0f), vec3(0.0f, 1.0f, 0.0f));
-    Camera* staticCamera2 = new Camera(vec3(-50.0f, 30.0f, -50.0f), vec3(5.0f, -1.0f, 5.0f), vec3(0.0f, 1.0f, 0.0f));
+    Camera* firstPersonCamera = new Camera(vec3(0.0f, 10.0f, 20.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
+    Camera* staticCamera1 = new Camera(vec3(50.0f, 30.0f, 50.0f), vec3(-1.0f, -1.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
+    Camera* staticCamera2 = new Camera(vec3(-50.0f, 30.0f, -50.0f), vec3(1.0f, -1.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f));
     camera = firstPersonCamera;
     firstPersonCamera->EnableGravity();
 
@@ -192,17 +187,6 @@ int main(int argc, char* argv[])
     float scaleXYZ = 1.0f;
 
     GLenum rendering = GL_TRIANGLES;
-
-
-    //// Set projection matrix for shader, this won't change
-    //mat4 projectionMatrix = glm::perspective(70.0f,            // field of view in degrees
-    //    1024.0f / 768.0f,  // aspect ratio
-    //    0.01f, 100.0f);   // near and far (near > 0)
-    //
-    //// Set initial view matrix
-    //mat4 viewMatrix = lookAt(cameraPosition,  // eye
-    //    cameraPosition + cameraLookAt,  // center
-    //    cameraUp); // up
 
 
     // Set View and Projection matrices on both shaders
@@ -253,7 +237,9 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLuint worldMatrixLocation = glGetUniformLocation(colorShaderProgram.ID, "worldMatrix");
 
-        
+        for (int i = 0; i < 100; i++)
+            physicalCubeArray[i] = nullptr;
+        cubeNum = 0;
         
         // Draw 100x100 Grid
         glUseProgram(colorShaderProgram.ID);
@@ -290,6 +276,7 @@ int main(int argc, char* argv[])
         mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY, trunkZ + rand2)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY, trunkZ + rand2), vec3(2.0f, 20.0f, 2.0f));
 
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
         for (int i = 0; i < 12; i+= 2)
@@ -297,11 +284,12 @@ int main(int argc, char* argv[])
             treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
+            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY + i, trunkZ + rand2), vec3(15.0f - i, 1.0f, 3.0f));
 
             treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-
+            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY + i, trunkZ + rand2), vec3(3.0f, 1.0f, 15.0f - i));
         }        
 
 
@@ -352,8 +340,9 @@ int main(int argc, char* argv[])
         else
             camera = staticCamera2;
 
-        camera->Update(dt);
+        camera->Update(&model, dt);
 
+        //terrainCollision(camera);
         handleInput(window, firstPersonCamera, dt, dx, dy);
 
 

@@ -13,6 +13,9 @@
 #include <glm/common.hpp>
 #include <algorithm>
 
+#include "Model.h"
+#include "Cube.h"
+
 using namespace glm;
 using namespace std;
 
@@ -20,7 +23,7 @@ class Camera
 {
 public:
     Camera(vec3, vec3, vec3);
-    void Update(float);
+    void Update(Model*, float);
     void Turn(float, float);
     void Move(bool, float);
     void Reset();
@@ -29,8 +32,9 @@ public:
     void Jump();
     void FastSpeed();
     void NormalSpeed();
-    bool CheckCollision(vec3, vec3, float);
+    bool CheckCollision(Cube*);
     void CheckBoundary();
+    inline void SetY(float position) { cameraPosition.y = position; }
     inline void SetPosition(vec3 position) { cameraPosition = position; }
     inline vec3 GetPosition() { return cameraPosition; }
     mat4 GetViewProjectionMatrix() const;
@@ -38,6 +42,7 @@ public:
     mat4 GetViewMatrix() const;
     void setViewMatrix(int, mat4);
     void setProjectionMatrix(int, mat4);
+    void TerrainCollision(Model*);
 private:
     GLuint projectionMatrixLocation;
     GLuint viewMatrixLocation;

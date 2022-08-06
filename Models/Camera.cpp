@@ -47,7 +47,7 @@ void Camera::setViewMatrix(int shaderProgram, mat4 viewMatrix)
 }
 
 
-void Camera::Update(float dt)
+void Camera::Update(Model* model, float dt)
 {
     // Apply gravity
     if (withGravity)
@@ -55,7 +55,7 @@ void Camera::Update(float dt)
 
     //CheckCollision();
     CheckBoundary();
-
+    TerrainCollision(model);
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &GetViewMatrix()[0][0]);
 }
 
@@ -132,9 +132,24 @@ void Camera::NormalSpeed()
     cameraSpeed = cameraNormalSpeed;
 }
 
-bool Camera::CheckCollision(vec3 planePoint, vec3 planeNormal, float distance)
+//bool Camera::CheckCollision(vec3 planePoint, vec3 planeNormal, float distance)
+//{
+//    return glm::dot(planeNormal, GetPosition() - planePoint) < distance;
+//}
+
+
+
+bool Camera::CheckCollision(Cube* cubes)
 {
-    return glm::dot(planeNormal, GetPosition() - planePoint) < distance;
+    for (int i = 0; i < 100; i++)
+    {
+        if (&cubes[i] != nullptr)
+        {
+            NULL;
+        }
+
+    }
+    return true;
 }
 
 void Camera::CheckBoundary()
@@ -147,11 +162,21 @@ void Camera::CheckBoundary()
 
     if (cameraPosition.y > 50)
         cameraPosition.y = 50;
-    else if (cameraPosition.y < 0.1)
-        cameraPosition.y = 0.1;
+    else if (cameraPosition.y < 1.1)
+        cameraPosition.y = 1.1;
 
     if (cameraPosition.z > 50)
         cameraPosition.z = -50;
     else if (cameraPosition.z < -50)
         cameraPosition.z = 50;
+}
+
+void Camera::TerrainCollision(Model* model)
+{
+    float xCoordinate = -cameraPosition.x + 49.0;
+    float zCoordinate = -cameraPosition.z + 49.0;
+    if (cameraPosition.y <= model->getTerrainHeightAt(xCoordinate, zCoordinate) + 1.1)
+    {
+        cameraPosition.y = model->getTerrainHeightAt(xCoordinate, zCoordinate) + 1.1;
+    }
 }

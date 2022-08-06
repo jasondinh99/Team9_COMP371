@@ -5,7 +5,9 @@
 
 Model::Model()
 {
-
+    for (int i = 0; i < 100; i++)
+        for (int j = 0; j < 100; j++)
+            terrainHeightArray[i][j] = 0;
 }
 
 int Model::createGridAO()
@@ -182,7 +184,7 @@ int Model::createTerrainAO() {
     srand(time(NULL));
     unsigned int seed = time(NULL);
     PerlinNoise pn(seed);
-    cout << " Seed: " << seed << endl;
+    //cout << " Seed: " << seed << endl;
     // caculate height of each ground square
     const unsigned int grid_depth = 100;
     const unsigned int grid_width = 100;
@@ -198,6 +200,7 @@ int Model::createTerrainAO() {
             double terrain_depth = i;
             double terrain_width = j;
             height_array[j][i] = terrain_height;
+            terrainHeightArray[j][i] = terrain_height;
         }
     }
 
@@ -213,7 +216,7 @@ int Model::createTerrainAO() {
         for (int x = 0; x < width; x++)
         {
             ColoredVertex v1 = ColoredVertex(vec3(-x * m_sqrWidth, height_array[x][z], -z * m_sqrWidth), vec3(0.1, 0.1 * height_array[x][z], 0.1));
-            std::cout << counter << std::endl;
+            //std::cout << counter << std::endl;
             vertexArray[counter] = v1;
             counter++;
         }
@@ -235,7 +238,7 @@ int Model::createTerrainAO() {
             indices[counter2++]=(base + 1); // BR
             indices[counter2++]=(base + width); // TL
             indices[counter2++] = (base + width + 1); // TR
-            std::cout << counter2 << std::endl;
+            //std::cout << counter2 << std::endl;
         }
     }
     // Create a vertex array
