@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     GLuint leavesTextureID = model.loadTexture("assets/textures/minecraft-leaves.png");
 
     // Grey background
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.52f, 0.8f, 0.9f, 1.0f);
 
     // Compile and link shaders here ...
     Shader colorShaderProgram("SolidColor.vs", "SolidColor.fs");
@@ -218,6 +218,7 @@ int main(int argc, char* argv[])
     
     
     int gridAO = model.createGridAO();
+    int terrainAO = model.createTerrainAO();
     int texturedCubeAO = model.createTexturedCubeAO();
 
 
@@ -236,30 +237,10 @@ int main(int argc, char* argv[])
 
     cout << glGetString(GL_VERSION);
 
-
-	// Perlin noise setup
-	srand(time(NULL));
-	unsigned int seed = time(NULL);
-	PerlinNoise pn(seed);
-	cout << " Seed: " << seed << endl;
-
-	// caculate height of each ground square
-	const unsigned int grid_depth = 100;
-	const unsigned int grid_width = 100;
-
-	unsigned int height_array[grid_width][grid_depth];
-
-	for (unsigned int i = 0; i < grid_depth; ++i) {     // z
-		for (unsigned int j = 0; j < grid_width; ++j) {  // x
-			double x = (double)j / ((double)grid_width);
-			double z = (double)i / ((double)grid_depth);
-
-			double terrain_height = floor(10 * pn.noise(x, z, 0.8)); // perlin noise to generate height between 0 and 9
-			double terrain_depth = i;
-			double terrain_width = j;
-			height_array[j][i] = terrain_height;
-		}
-	}
+    //random variables
+    srand(static_cast <unsigned> (time(0)));
+    float rand1 = -50 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (50 - (-50))));
+    float rand2 = -50 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (50 - (-50))));
 
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
@@ -276,6 +257,8 @@ int main(int argc, char* argv[])
         
         // Draw 100x100 Grid
         glUseProgram(colorShaderProgram.ID);
+        glBindVertexArray(terrainAO);
+        glDrawElements(GL_TRIANGLE_STRIP, 99 * 99 * 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(gridAO);
         mat4 gridWorldMatrix;
         for (int i = 0; i < 100; i++)
@@ -304,32 +287,22 @@ int main(int argc, char* argv[])
         float trunkY = 10.0f;
         float trunkZ = 0.0f;
 
-        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY, trunkZ + rand2)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
         for (int i = 0; i < 12; i+= 2)
         {
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
+            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY + i, trunkZ)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
+            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
         }        
-
-		// Draw ground
-		for (int z_position = 0; z_position < grid_depth; z_position++) {     // z
-			for (int x_position = 0; x_position < grid_width; x_position++) {  // x
-				mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(x_position-50, height_array[z_position][x_position], z_position-50)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
-				setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
-		}
-
 
 
         glBindVertexArray(0);
@@ -352,14 +325,16 @@ int main(int argc, char* argv[])
         //Shift
         bool shiftPressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
 
-		// print heigth of terrain
-		if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
-			for (int i = 0; i < grid_depth; i++) {
-				for (int j = 0; j < grid_width; j++) {
-					cout << "(" << j << ", " << i << ") = " << height_array[j][i] << endl;
-				}
-			}
-		}
+
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        }
+        if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
         double mousePosX, mousePosY;
         glfwGetCursorPos(window, &mousePosX, &mousePosY);

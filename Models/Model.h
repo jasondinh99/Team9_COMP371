@@ -4,10 +4,10 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
+#include <vector>
 
 #define GLEW_STATIC 1   // This allows linking with Static Library on Windows, without DLL
 #include <GL/glew.h>    // Include GLEW - OpenGL Extension Wrangler
-
 #include <GLFW/glfw3.h> // GLFW provides a cross-platform interface for creating a graphical context,
 // initializing OpenGL and binding inputs
 
@@ -17,6 +17,7 @@
 #include <glm/common.hpp>
 
 #include "VAO.h"
+#include "PerlinNoise.h"
 
 
 using namespace glm;
@@ -36,6 +37,7 @@ public:
 	// Methods
 	int createGridAO();
 	int createTexturedCubeAO();
+	int createTerrainAO();
 	GLuint loadTexture(const char* filename);
 
 private:

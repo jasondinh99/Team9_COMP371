@@ -165,3 +165,116 @@ GLuint Model::loadTexture(const char* filename)
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureId;
 }
+
+int Model::createTerrainAO() {
+    struct ColoredVertex
+    {
+        ColoredVertex(vec3 _position, vec3 _color)
+            : position(_position), color(_color){}
+        ColoredVertex()
+            : position(vec3(0.0f)), color(vec3(0.0f)) {}
+
+        vec3 position;
+        vec3 color;
+    };
+
+    // Perlin noise setup
+    srand(time(NULL));
+    unsigned int seed = time(NULL);
+    PerlinNoise pn(seed);
+    cout << " Seed: " << seed << endl;
+    // caculate height of each ground square
+    const unsigned int grid_depth = 100;
+    const unsigned int grid_width = 100;
+
+    unsigned int height_array[grid_width][grid_depth];
+
+    for (unsigned int i = 0; i < grid_depth; ++i) {     // z
+        for (unsigned int j = 0; j < grid_width; ++j) {  // x
+            double x = (double)j / ((double)grid_width);
+            double z = (double)i / ((double)grid_depth);
+
+            double terrain_height = floor(10 * pn.noise(x, z, 0.8)); // perlin noise to generate height between 0 and 9
+            double terrain_depth = i;
+            double terrain_width = j;
+            height_array[j][i] = terrain_height;
+        }
+    }
+
+    ColoredVertex vertexArray[100*100];
+    int indices[99*99*6];
+    int width = 100;
+    int height = 100;
+    int m_sqrWidth = 1;
+    //Calculating Vertices
+    int counter = 0;
+    for (int z = 0; z < height; z++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            ColoredVertex v1 = ColoredVertex(vec3(-x * m_sqrWidth, height_array[x][z], -z * m_sqrWidth), vec3(0.1, 0.1 * height_array[x][z], 0.1));
+            std::cout << counter << std::endl;
+            vertexArray[counter] = v1;
+            counter++;
+        }
+    }
+
+    //Calculating Indices
+    int counter2 = 0;
+    for (int z = 0; z < height-1; z++)
+    {
+        for (int x = 0; x < width-1; x++)
+        {
+            int base = x + (width*z);
+            //TODO: if time, alternate triangles so it meshes better
+            // bottom-left triangle
+            indices[counter2++]=(base + 0); // BR
+            indices[counter2++]=(base + 1); // TL
+            indices[counter2++]=(base + width); // BL
+            // top-right triangle
+            indices[counter2++]=(base + 1); // BR
+            indices[counter2++]=(base + width); // TL
+            indices[counter2++] = (base + width + 1); // TR
+            std::cout << counter2 << std::endl;
+        }
+    }
+    // Create a vertex array
+    GLuint vertexArrayObject;
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
+
+    // Upload Vertex Buffer to the GPU, keep a reference to it (vertexBufferObject)
+    GLuint vertexBufferObject;
+    glGenBuffers(1, &vertexBufferObject);
+
+    GLuint EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0,                   // attribute 0 matches aPos in Vertex Shader
+        3,                   // size
+        GL_FLOAT,            // type
+        GL_FALSE,            // normalized?
+        sizeof(ColoredVertex), // stride - each vertex contain 2 vec3 (position, color)
+        (void*)0             // array buffer offset
+    );
+    glEnableVertexAttribArray(0);
+
+
+    glVertexAttribPointer(1,                            // attribute 1 matches aColor in Vertex Shader
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ColoredVertex),
+        (void*)sizeof(vec3)      // color is offseted a vec3 (comes after position)
+    );
+    glEnableVertexAttribArray(1);
+
+
+    return vertexArrayObject;
+}
