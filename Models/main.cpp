@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
         // Draw 100x100 Grid
         glUseProgram(colorShaderProgram.ID);
         glBindVertexArray(terrainAO);
-        glDrawElements(GL_TRIANGLE_STRIP, 99 * 99 * 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLE_STRIP, 100 * 100 * 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(gridAO);
         mat4 gridWorldMatrix;
         for (int i = 0; i < 100; i++)
