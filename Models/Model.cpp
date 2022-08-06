@@ -226,7 +226,7 @@ int Model::createTerrainAO() {
     int counter2 = 0;
     for (int z = 0; z < height; z++)
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < width-1; x++)
         {
             int base = x + (width*z);
             //TODO: if time, alternate triangles so it meshes better

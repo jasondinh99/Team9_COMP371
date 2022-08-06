@@ -200,7 +200,6 @@ int main(int argc, char* argv[])
 
     // Define and upload geometry to the GPU here ...
     
-    
     int gridAO = model.createGridAO();
     int terrainAO = model.createTerrainAO();
     int texturedCubeAO = model.createTexturedCubeAO();
@@ -223,8 +222,11 @@ int main(int argc, char* argv[])
 
     //random variables
     srand(static_cast <unsigned> (time(0)));
-    float rand1 = -50 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (50 - (-50))));
-    float rand2 = -50 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (50 - (-50))));
+    float randArray[5*2];
+    for (int i = 0; i < 10; i++) {
+        float rand1 = -50 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (50 - (-50))));
+        randArray[i] = rand1;
+    }
 
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
@@ -244,7 +246,7 @@ int main(int argc, char* argv[])
         // Draw 100x100 Grid
         glUseProgram(colorShaderProgram.ID);
         glBindVertexArray(terrainAO);
-        glDrawElements(GL_TRIANGLE_STRIP, 100 * 100 * 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLE_STRIP, 99 * 99 * 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(gridAO);
         mat4 gridWorldMatrix;
         for (int i = 0; i < 100; i++)
@@ -264,34 +266,35 @@ int main(int argc, char* argv[])
         // Draw Textured geometry
         glUseProgram(texturedShaderProgram.ID);
 
-        glActiveTexture(GL_TEXTURE0);
-        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-        glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
-        glUniform1i(textureLocation, 0);
+        for (int i = 0; i < 10; i += 2) {
+            glActiveTexture(GL_TEXTURE0);
+            GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+            glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+            glUniform1i(textureLocation, 0);
 
-        float trunkX = 0.0f;
-        float trunkY = 10.0f;
-        float trunkZ = 0.0f;
+            float trunkX = 0.0f + randArray[i];
+            float trunkY = 10.0f;
+            float trunkZ = 0.0f + randArray[i + 1];
 
-        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY, trunkZ + rand2)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
-        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY, trunkZ + rand2), vec3(2.0f, 20.0f, 2.0f));
-
-        glBindTexture(GL_TEXTURE_2D, leavesTextureID);
-        for (int i = 0; i < 12; i+= 2)
-        {
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(15.0f - i, 1.0f, 3.0f));
+            mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY + i, trunkZ + rand2), vec3(15.0f - i, 1.0f, 3.0f));
+            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f));
 
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + rand1, trunkY + i, trunkZ + rand2)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - i));
-            setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX + rand1, trunkY + i, trunkZ + rand2), vec3(3.0f, 1.0f, 15.0f - i));
-        }        
+            glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+            for (int j = 0; j < 12; j += 2)
+            {
+                treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY + j, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - j, 1.0f, 3.0f));
+                setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(15.0f - j, 1.0f, 3.0f));
 
+                treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY + j, trunkZ)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - j));
+                setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(3.0f, 1.0f, 15.0f - j));
+            }
+        }
 
         glBindVertexArray(0);
         // End Frame
