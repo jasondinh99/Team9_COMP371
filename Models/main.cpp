@@ -166,10 +166,15 @@ int main(int argc, char* argv[])
     }
 
     // Load Textures
-    GLuint brickTextureID = model.loadTexture("assets/textures/brick.jpg");
-    GLuint cementTextureID = model.loadTexture("assets/textures/cement.jpg");
-    GLuint tree_barkTextureID = model.loadTexture("assets/textures/tree-bark.jpg");
-    GLuint leavesTextureID = model.loadTexture("assets/textures/minecraft-leaves.png");
+    GLuint tree1TextureID = model.loadTexture("assets/textures/tree-bark.jpg");
+    GLuint tree2TextureID = model.loadTexture("assets/textures/tree-bark.jpg");
+    GLuint tree3TextureID = model.loadTexture("assets/textures/tree3.jpg");
+    GLuint tree4TextureID = model.loadTexture("assets/textures/tree4.png");
+
+    GLuint leaves1TextureID = model.loadTexture("assets/textures/leaves1.jpg");
+    GLuint leaves2TextureID = model.loadTexture("assets/textures/leaves2.jpg");
+    GLuint leaves3TextureID = model.loadTexture("assets/textures/leaves3.jpg");
+    GLuint leaves4TextureID = model.loadTexture("assets/textures/minecraft-leaves.png");
 
     // Grey background
     glClearColor(0.52f, 0.8f, 0.9f, 1.0f);
@@ -273,7 +278,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        /*Draw Tree*/
+        /*Draw Christmas Tree*/
         glBindVertexArray(texturedCubeAO);
 
         // Draw Textured geometry
@@ -289,19 +294,19 @@ int main(int argc, char* argv[])
 
             glActiveTexture(GL_TEXTURE0);
         textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-        glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+        glBindTexture(GL_TEXTURE_2D, tree1TextureID);
         glUniform1i(textureLocation, 0);
 
             trunkX = 0.0f + randArray[i];
             trunkY = 10.0f;
             trunkZ = 0.0f + randArray[i + 1];
 
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY, trunkZ)) * scale(mat4(1.0f), vec3(1.5f, 20.0f, 1.5f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             physicalCubeList.push_back(Cube(vec3(trunkX , trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
-            glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+            glBindTexture(GL_TEXTURE_2D, leaves1TextureID);
             for (int j = 0; j < 12; j += 2)
             {
                 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY + j, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - j, 1.0f, 3.0f));
@@ -327,14 +332,14 @@ int main(int argc, char* argv[])
         {
             glActiveTexture(GL_TEXTURE0);
             textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-            glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+            glBindTexture(GL_TEXTURE_2D, tree2TextureID);
             glUniform1i(textureLocation, 0);
 
             trunkX = 0.0f + randArray[i];
             trunkY = 10.0f;
             trunkZ = 0.0f + randArray[i + 1];
 
-            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(1.5, 20.0f, 1.5f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
@@ -342,7 +347,7 @@ int main(int argc, char* argv[])
 
 
             // Draw Branches Bottom
-            glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+            glBindTexture(GL_TEXTURE_2D, leaves2TextureID);
             for (int y = 0; y < 5; y++)
             {
                 for (int x = -1 - y; x < 2 + y; x++)
@@ -387,7 +392,7 @@ int main(int argc, char* argv[])
             {
                 glActiveTexture(GL_TEXTURE0);
                 textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-                glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+                glBindTexture(GL_TEXTURE_2D, tree3TextureID);
                 glUniform1i(textureLocation, 0);
 
                 trunkX = 0.0f + randArray[i];
@@ -400,7 +405,7 @@ int main(int argc, char* argv[])
                 physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
                 // Draw Branches Bottom
-                glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+                glBindTexture(GL_TEXTURE_2D, leaves3TextureID);
 
                 // Bottom branches
                 for (int x = -2; x < 3; x++)
@@ -441,7 +446,7 @@ int main(int argc, char* argv[])
         {
             glActiveTexture(GL_TEXTURE0);
             textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
-            glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+            glBindTexture(GL_TEXTURE_2D, tree1TextureID);
             glUniform1i(textureLocation, 0);
 
             trunkX = 0.0f + randArray[i];
@@ -454,7 +459,7 @@ int main(int argc, char* argv[])
             physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 2.0f, 2.0f)));
 
             // Draw Branches
-            glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+            glBindTexture(GL_TEXTURE_2D, leaves4TextureID);
             for (int y = 0; y < 9; y++)
             {
                 for (int x = -1 - rand1[y]; x < 2 + rand2[y]; x++)
