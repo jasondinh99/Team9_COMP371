@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLuint worldMatrixLocation = glGetUniformLocation(colorShaderProgram.ID, "worldMatrix");
 
-        cubeNum = 0;
+        physicalCubeList.clear();
         
         // Draw 100x100 Grid
         glUseProgram(colorShaderProgram.ID);
