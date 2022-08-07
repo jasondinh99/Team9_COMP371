@@ -15,13 +15,6 @@
 using namespace glm;
 using namespace std;
 
-
-//const vec3 BLACK = vec3(0.0f, 0.0f, 0.0f);
-//const vec3 WHITE = vec3(1.0f, 1.0f, 1.0f);
-//const vec3 RED = vec3(1.0f, 0.0f, 0.0f);
-//const vec3 GREEN = vec3(0.0f, 1.0f, 0.0f);
-//const vec3 BLUE = vec3(0.0f, 0.0f, 1.0f);
-
 class Cube
 {
 public:
@@ -36,32 +29,5 @@ public:
 	inline float GetMaxZ() { return maxZ; }
 	inline float GetMinZ() { return minZ; }
 private:
-//	int shaderID;
-//	GLuint shapeWorldMatrixLocation;
-//	GLuint textureID;
-//	GLuint vertexArrayObject;
-//	GLuint vertexBufferObject;
-//	GLuint primitiveBuffer;
-//	mat4 originalMatrix;		// original shape
-//	mat4 cubeMatrix;			// transformation applied on the cube
-//	mat4 hierarchicalMatrix;	// hierarchical
-//	mat4 worldMatrix;			// for world orientation
-//	mat4 movementMatrix;
-//	mat4 animationMatrix;
 	vec3 centerPosition;
-//	vec3 color;
-//	int renderMode = 0;			// 0: triangles;	1: lines;	2: points
-//	float angle = 0.0f;
-
-//	struct TexturedColoredVertex
-//	{
-//		TexturedColoredVertex(vec3 _position, vec3 _color, vec2 _uv)
-//			: position(_position), color(_color), uv(_uv) {}
-//
-//		vec3 position;
-//		vec3 color;
-//		vec2 uv;
-//	};
-//
-//	int createTexturedCubeVertexArrayObject();
 };
