@@ -276,6 +276,7 @@ int main(int argc, char* argv[])
                 gridWorldMatrix = translate(mat4(1.0f), vec3(-50.0f + i, 0.0f, -50.0f + j)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                 setWorldMatrix(colorShaderProgram.ID, gridWorldMatrix);
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
+                physicalCubeList.push_back(Cube(vec3(-50.0f + i, 0.0f, -50.0f + j), vec3(1.0f, 1.0f, 1.0f)));
 
             }
         }
@@ -406,6 +407,7 @@ int main(int argc, char* argv[])
                 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + 5, trunkZ + z)) * scale(mat4(1.0f), vec3(2.0f, 2.0f, 2.0f));
                 setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
+                physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + 5, trunkZ + z), vec3(2.0f, 2.0f, 2.0f)));
                 
             }
         }
@@ -418,6 +420,7 @@ int main(int argc, char* argv[])
                 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY +7, trunkZ + z)) * scale(mat4(1.0f), vec3(2.0f, 2.0f, 2.0f));
                 setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
+                physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + 7, trunkZ + z), vec3(2.0f, 2.0f, 2.0f)));
                
             }
         }
@@ -440,6 +443,7 @@ int main(int argc, char* argv[])
         treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 2.0f, 2.0f)));
 
         // Draw Branches
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
@@ -452,6 +456,7 @@ int main(int argc, char* argv[])
                     treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y + 2, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
+                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + y + 2, trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
                     
                 }
             }
