@@ -198,6 +198,18 @@ int main(int argc, char* argv[])
 
     GLenum rendering = GL_TRIANGLES;
 
+    // Random Values
+    int rand1[10];
+    int rand2[10];
+    int rand3[10];
+    int rand4[10];
+    for (int i = 0; i < 10; i++)
+    {
+        rand1[i] = random(0, 3);
+        rand2[i] = random(0, 3);
+        rand3[i] = random(0, 3);
+        rand4[i] = random(0, 3);
+    }
 
     // Set View and Projection matrices on both shaders
     setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
@@ -363,7 +375,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        /*Draw Apple Tree*/
+        /*Draw Short Tree*/
         glBindVertexArray(texturedCubeAO);
 
         // Draw Textured geometry
@@ -374,47 +386,80 @@ int main(int argc, char* argv[])
         glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
         glUniform1i(textureLocation, 0);
 
-        trunkX = 0.0f;
-        trunkY = 10.0f;
+        trunkX = 15.0f;
+        trunkY = 5.0f;
         trunkZ = 0.0f;
 
-        treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 10.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
         // Draw Branches Bottom
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
-       for (int y = 0; y < 5; y++)
+       
+        // Bottom branches
+        for (int x = -2; x < 3; x++)
         {
-            for (int x = -1-y; x < 2+y; x++)
+            for (int z = -2; z < 3; z++)
             {
-                for (int z = -1-y; z < 2+y; z++)
+                treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + 5, trunkZ + z)) * scale(mat4(1.0f), vec3(2.0f, 2.0f, 2.0f));
+                setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                
+            }
+        }
+        
+        // Top branches
+        for (int x = -1; x < 2; x++)
+        {
+            for (int z = -1; z < 2; z++)
+            {
+                treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY +7, trunkZ + z)) * scale(mat4(1.0f), vec3(2.0f, 2.0f, 2.0f));
+                setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+               
+            }
+        }
+
+        /*Draw Random Tree*/
+        glBindVertexArray(texturedCubeAO);
+
+        // Draw Textured geometry
+        glUseProgram(texturedShaderProgram.ID);
+
+        glActiveTexture(GL_TEXTURE0);
+        textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
+        glUniform1i(textureLocation, 0);
+
+        trunkX = -20.0f;
+        trunkY = 10.0f;
+        trunkZ = 0.0f;
+
+        treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw Branches
+        glBindTexture(GL_TEXTURE_2D, leavesTextureID);
+        for (int y = 0; y < 8; y++)
+        {
+            for (int x = -1 - rand1[y]; x < 2 + rand2[y]; x++)
+            {
+                for (int z = -1 - rand3[y]; z < 2 + rand4[y]; z++)
                 {
-                    treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+                    treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y + 2, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
-                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + y, trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
+                    
                 }
             }
         }
 
-       // Draw Branches Top
+        
 
-        for (int y = 0; y < 5; y++)
-        {
-            for (int x = -5 + y; x < 7 - y; x++)
-            {
-                for (int z = -5 + y; z < 7 - y; z++)
-                {
-                    treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + (y+5), trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
-                    setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
-                    glDrawArrays(GL_TRIANGLES, 0, 36);
-                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + (y + 5), trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
-                }
-            }
-        }
-
+       
         glBindVertexArray(0);
         // End Frame
 
