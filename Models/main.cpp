@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
 
         // Draw Branches
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
-        for (int y = 0; y < 8; y++)
+        for (int y = 0; y < 9; y++)
         {
             for (int x = -1 - rand1[y]; x < 2 + rand2[y]; x++)
             {
