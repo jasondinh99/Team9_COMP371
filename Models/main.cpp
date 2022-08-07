@@ -28,11 +28,10 @@ using namespace std;
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float dy);
-void terrainCollision(Camera* camera);
+void handleInput(GLFWwindow*, Camera*, float, float, float);
 
 int currentCamera = 1;
-Cube* physicalCubeArray[100];
+vector<Cube> physicalCubeList;
 int cubeNum = 0;
 vec3 color = vec3(1.0f, 1.0f, 1.0f);
 
@@ -250,8 +249,6 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLuint worldMatrixLocation = glGetUniformLocation(colorShaderProgram.ID, "worldMatrix");
 
-        for (int i = 0; i < 100; i++)
-            physicalCubeArray[i] = nullptr;
         cubeNum = 0;
         
         // Draw 100x100 Grid
@@ -277,23 +274,27 @@ int main(int argc, char* argv[])
         // Draw Textured geometry
         glUseProgram(texturedShaderProgram.ID);
        
-
+        GLuint textureLocation;
+        float trunkX;
+        float trunkY;
+        float trunkZ;
+        mat4 treeWorldMatrix;
 
         for (int i = 0; i < 10; i += 2) {
 
             glActiveTexture(GL_TEXTURE0);
-        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
         glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
         glUniform1i(textureLocation, 0);
 
-            float trunkX = 0.0f + randArray[i];
-            float trunkY = 10.0f;
-            float trunkZ = 0.0f + randArray[i + 1];
+            trunkX = 0.0f + randArray[i];
+            trunkY = 10.0f;
+            trunkZ = 0.0f + randArray[i + 1];
 
-            mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+            treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
             setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-            physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f));
+            physicalCubeList.push_back(Cube(vec3(trunkX , trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
             glBindTexture(GL_TEXTURE_2D, leavesTextureID);
             for (int j = 0; j < 12; j += 2)
@@ -301,12 +302,12 @@ int main(int argc, char* argv[])
                 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY + j, trunkZ)) * scale(mat4(1.0f), vec3(15.0f - j, 1.0f, 3.0f));
                 setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
-                physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(15.0f - j, 1.0f, 3.0f));
+                physicalCubeList.push_back(Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(15.0f - j, 1.0f, 3.0f)));
 
                 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX , trunkY + j, trunkZ)) * scale(mat4(1.0f), vec3(3.0f, 1.0f, 15.0f - j));
                 setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
-                physicalCubeArray[cubeNum++] = new Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(3.0f, 1.0f, 15.0f - j));
+                physicalCubeList.push_back(Cube(vec3(trunkX , trunkY + j, trunkZ), vec3(3.0f, 1.0f, 15.0f - j)));
             }
         }
 	    
@@ -317,17 +318,18 @@ int main(int argc, char* argv[])
         glUseProgram(texturedShaderProgram.ID);
 
         glActiveTexture(GL_TEXTURE0);
-        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
         glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
         glUniform1i(textureLocation, 0);
 
-        float trunkX = 0.0f;
-        float trunkY = 10.0f;
-        float trunkZ = 0.0f;
+        trunkX = 0.0f;
+        trunkY = 10.0f;
+        trunkZ = 0.0f;
 
-        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
         // Draw Branches Bottom
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
@@ -340,6 +342,7 @@ int main(int argc, char* argv[])
                     treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
+                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + y, trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
                 }
             }
         }
@@ -355,6 +358,7 @@ int main(int argc, char* argv[])
                     treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + (y+5), trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
+                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + (y + 5), trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
                 }
             }
         }
@@ -366,17 +370,18 @@ int main(int argc, char* argv[])
         glUseProgram(texturedShaderProgram.ID);
 
         glActiveTexture(GL_TEXTURE0);
-        GLuint textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
+        textureLocation = glGetUniformLocation(texturedShaderProgram.ID, "textureSampler");
         glBindTexture(GL_TEXTURE_2D, tree_barkTextureID);
         glUniform1i(textureLocation, 0);
 
-        float trunkX = 0.0f;
-        float trunkY = 10.0f;
-        float trunkZ = 0.0f;
+        trunkX = 0.0f;
+        trunkY = 10.0f;
+        trunkZ = 0.0f;
 
-        mat4 treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
+        treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX, trunkY, trunkZ)) * scale(mat4(1.0f), vec3(2.0f, 20.0f, 2.0f));
         setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        physicalCubeList.push_back(Cube(vec3(trunkX, trunkY, trunkZ), vec3(2.0f, 20.0f, 2.0f)));
 
         // Draw Branches Bottom
         glBindTexture(GL_TEXTURE_2D, leavesTextureID);
@@ -389,6 +394,7 @@ int main(int argc, char* argv[])
                     treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + y, trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
+                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + y, trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
                 }
             }
         }
@@ -404,13 +410,10 @@ int main(int argc, char* argv[])
                     treeWorldMatrix = translate(mat4(1.0f), vec3(trunkX + x, trunkY + (y+5), trunkZ + z)) * scale(mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
                     setWorldMatrix(texturedShaderProgram.ID, treeWorldMatrix);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
+                    physicalCubeList.push_back(Cube(vec3(trunkX + x, trunkY + (y + 5), trunkZ + z), vec3(1.0f, 1.0f, 1.0f)));
                 }
             }
         }
-       
-
-       
-
 
         glBindVertexArray(0);
         // End Frame
@@ -459,39 +462,9 @@ int main(int argc, char* argv[])
         else
             camera = staticCamera2;
 
-        camera->Update(&model, dt);
-
-        //terrainCollision(camera);
         handleInput(window, firstPersonCamera, dt, dx, dy);
 
-
-        //// Convert to spherical coordinates
-        //const float cameraAngularSpeed = 1.0f;
-        //
-        //cameraHorizontalAngle -= dx * cameraAngularSpeed * dt;
-        //cameraVerticalAngle -= dy * cameraAngularSpeed * dt;
-
-
-
-        //// World Orientation
-        // // Clamp vertical angle to [-85, 85] degrees
-        //cameraVerticalAngle = std::max(-85.0f, std::min(85.0f, cameraVerticalAngle));
-        //if (cameraHorizontalAngle > 360)
-        //{
-        //    cameraHorizontalAngle -= 360;
-        //}
-        //else if (cameraHorizontalAngle < -360)
-        //{
-        //    cameraHorizontalAngle += 360;
-        //}
-
-        //float theta = radians(cameraHorizontalAngle);
-        //float phi = radians(cameraVerticalAngle);
-        //
-        //cameraLookAt = vec3(cosf(phi) * cosf(theta), sinf(phi), -cosf(phi) * sinf(theta));
-        //vec3 cameraSideVector = glm::cross(cameraLookAt, vec3(0.0f, 1.0f, 0.0f));
-        //
-        //glm::normalize(cameraSideVector);
+        camera->Update(&model, physicalCubeList, dt);
 
         setViewMatrix(colorShaderProgram.ID, camera->GetViewMatrix());
         setViewMatrix(texturedShaderProgram.ID, camera->GetViewMatrix());
@@ -519,13 +492,13 @@ void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float d
         glfwSetWindowShouldClose(window, true);
 
     // Choose camera
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)      // close screen
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)      // use first person camera
         currentCamera = 1;
 
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)      // close screen
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)      // switch to first static camera
         currentCamera = 2;
 
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)      // close screen
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)      // switch to second static camera
         currentCamera = 3;
 
     // WASD
@@ -549,21 +522,21 @@ void handleInput(GLFWwindow* window, Camera* camera, float dt, float dx, float d
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) //Zoom in
         camera->Move(true, -dt);
 
-    if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) //Zoom in
+    if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) //Enable gravity
         camera->EnableGravity();
 
-    if (glfwGetKey(window, GLFW_KEY_END) == GLFW_PRESS) //Zoom in
+    if (glfwGetKey(window, GLFW_KEY_END) == GLFW_PRESS) //Disable gravity
         camera->DisableGravity();
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) //Zoom in
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) //Jumping
         camera->Jump();
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) //Zoom in
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) //Moving in fast speed
         camera->FastSpeed();
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) //Zoom in
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) //Moving in normal speed
         camera->NormalSpeed();
 
-    // Mouse buttons
+    // Mouse to turn
     camera->Turn(dx * -0.01, dy * -0.01);
 }

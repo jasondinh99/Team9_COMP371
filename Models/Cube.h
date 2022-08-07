@@ -26,24 +26,8 @@ class Cube
 {
 public:
 	Cube(vec3, vec3);
-//	Cube(mat4, vec3, GLuint, int);
 	~Cube();
-//	void Draw();
-//	void Rotate(float, vec3);
-//	void Translate(vec3);
-//	void Scale(vec3);
-//	vec3 Random();
-//	void RotateHierarchical(float, vec3);
-//	void TranslateHierarchical(vec3);
-//	void ScaleHierarchical(vec3);
-//	void RandomHierarchical(vec3);
-//	void RotateWorld(float, vec3);
-//	void Reset();
-//	void setRenderMode(int);
-//	void RotateAnimation(float, vec3);
-//	void TranslateAnimation(vec3);
-//	void ScaleAnimation(vec3);
-//	void ResetAnimation();
+	float maxX = 0.5, minX = -0.5, maxY = 0.5, minY = -0.5, maxZ = 0.5, minZ = -0.5;
 	inline vec3 GetPosition() { return centerPosition; }
 	inline float GetMaxX() { return maxX; }
 	inline float GetMinX() { return minX; }
@@ -68,7 +52,6 @@ private:
 //	vec3 color;
 //	int renderMode = 0;			// 0: triangles;	1: lines;	2: points
 //	float angle = 0.0f;
-	float maxX = 0.5, minX = -0.5, maxY = 0.5, minY = -0.5, maxZ = 0.5, minZ = -0.5;
 
 //	struct TexturedColoredVertex
 //	{

@@ -47,15 +47,16 @@ void Camera::setViewMatrix(int shaderProgram, mat4 viewMatrix)
 }
 
 
-void Camera::Update(Model* model, float dt)
+void Camera::Update(Model* model, vector<Cube> cubes, float dt)
 {
     // Apply gravity
     if (withGravity)
         cameraPosition += vec3(0.0f, -1.0f, 0.0f) * dt * gravity;
 
-    //CheckCollision();
+    CheckCollision(cubes);
     CheckBoundary();
     TerrainCollision(model);
+
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &GetViewMatrix()[0][0]);
 }
 
@@ -132,24 +133,80 @@ void Camera::NormalSpeed()
     cameraSpeed = cameraNormalSpeed;
 }
 
-//bool Camera::CheckCollision(vec3 planePoint, vec3 planeNormal, float distance)
-//{
-//    return glm::dot(planeNormal, GetPosition() - planePoint) < distance;
-//}
-
-
-
-bool Camera::CheckCollision(Cube* cubes)
+bool Camera::CheckCollision(vector<Cube> cubes)
 {
-    for (int i = 0; i < 100; i++)
+    bool collisionX = false;
+    bool collisionY = false;
+    bool collisionZ = false;
+    float xDif = 1000.0;
+    float yDif = 1000.0;
+    float zDif = 1000.0;
+    float xStop = 0.0;
+    float yStop = 0.0;
+    float zStop = 0.0;
+
+    for (Cube cube : cubes)
     {
-        if (&cubes[i] != nullptr)
+        collisionX = cameraPosition.x >= cube.GetMinX() - 0.1 && cameraPosition.x <= cube.GetMaxX()+0.1;
+        collisionY = cameraPosition.y >= cube.GetMinY() - 0.1 && cameraPosition.y <= cube.GetMaxY()+0.1;
+        collisionZ = cameraPosition.z >= cube.GetMinZ() - 0.1 && cameraPosition.z <= cube.GetMaxZ()+0.1;
+        
+        if ((collisionX && collisionY) && (collisionX && collisionZ))
         {
-            NULL;
+            if (collisionX)
+            {
+                if (cameraPosition.x - cube.GetMinX() > cube.GetMaxX() - cameraPosition.x)
+                {
+                    xDif = cube.GetMaxX() - cameraPosition.x;
+                    xStop = cube.GetMaxX() + 0.1;
+                }
+                else
+                {
+                    xDif = cameraPosition.x - cube.GetMinX();
+                    xStop = cube.GetMinX() - 0.1;
+                }
+            }
+            if (collisionY)
+            {
+                if (cameraPosition.y - cube.GetMinY() > cube.GetMaxY() - cameraPosition.y)
+                {
+                    yDif = cube.GetMaxY() - cameraPosition.y;
+                    yStop = cube.GetMaxY() + 0.1;
+                }
+                else
+                {
+                    yDif = cameraPosition.y - cube.GetMinY();
+                    yStop = cube.GetMinY() - 0.1;
+                }
+            }
+            if (collisionZ)
+            {
+                if (cameraPosition.z - cube.GetMinZ() > cube.GetMaxZ() - cameraPosition.z)
+                {
+                    zDif = cube.GetMaxZ() - cameraPosition.z;
+                    zStop = cube.GetMaxZ() + 0.1;
+                }
+                else
+                {
+                    zDif = cameraPosition.z - cube.GetMinZ();
+                    zStop = cube.GetMinZ() - 0.1;
+                }
+            }
+
+            if (xDif < yDif && xDif < zDif)
+                cameraPosition.x = xStop;
+            if (yDif < xDif && yDif < zDif)
+                cameraPosition.y = yStop;
+            if (zDif < yDif && zDif < xDif)
+                cameraPosition.z = zStop;
+
+            //cout << "INTERSECTION DETECTED at" << xDif << " " << yDif << " " << zDif << endl;
+
+            return true;
         }
 
     }
-    return true;
+    return false;
 }
 
 void Camera::CheckBoundary()
@@ -174,7 +231,7 @@ void Camera::CheckBoundary()
 void Camera::TerrainCollision(Model* model)
 {
     float xCoordinate = -cameraPosition.x + 49.0;
-    float zCoordinate = -cameraPosition.z + 49.0;
+    float zCoordinate = -cameraPosition.z + 50.0;
     if (cameraPosition.y <= model->getTerrainHeightAt(xCoordinate, zCoordinate) + 1.1)
     {
         cameraPosition.y = model->getTerrainHeightAt(xCoordinate, zCoordinate) + 1.1;

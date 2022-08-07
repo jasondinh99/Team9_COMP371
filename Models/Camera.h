@@ -23,7 +23,7 @@ class Camera
 {
 public:
     Camera(vec3, vec3, vec3);
-    void Update(Model*, float);
+    void Update(Model*, vector<Cube>, float);
     void Turn(float, float);
     void Move(bool, float);
     void Reset();
@@ -32,7 +32,7 @@ public:
     void Jump();
     void FastSpeed();
     void NormalSpeed();
-    bool CheckCollision(Cube*);
+    bool CheckCollision(vector<Cube>);
     void CheckBoundary();
     inline void SetY(float position) { cameraPosition.y = position; }
     inline void SetPosition(vec3 position) { cameraPosition = position; }
